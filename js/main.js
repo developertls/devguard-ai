@@ -669,8 +669,24 @@ function initAuth() {
     return;
   }
 
-  btnLogin.addEventListener('click', () => {
-    if (inputUser.value.trim() === 'demo' && inputPass.value === 'demo123') {
+  // Función auxiliar para encriptar
+  async function hashPassword(password) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  btnLogin.addEventListener('click', async () => {
+    const user = inputUser.value.trim();
+    const pass = inputPass.value.trim();
+    
+    // Hash SHA-256 de "demo123" generado de forma segura
+    const EXPECTED_HASH = "12759e6eb13e01bc6c016e78dd69ea2aa3f47c944883584d4af268498f7d9834";
+    const hashedInput = await hashPassword(pass);
+
+    if (user === 'demo' && hashedInput === EXPECTED_HASH) {
       sessionStorage.setItem('devguard_auth', 'true');
       overlay.classList.remove('open');
       showToast('Autenticación exitosa. Bienvenido al panel.', 'success');
