@@ -57,6 +57,25 @@
     </div>
   </div>
 
+  <!-- ═══════════════ LOGIN MODAL ═══════════════ -->
+  <div class="modal-overlay open" id="loginOverlay" style="z-index: 9999; backdrop-filter: blur(20px); background: #070b14;">
+    <div class="modal" style="transform: translateY(0); box-shadow: 0 0 80px rgba(59,130,246,0.3);">
+      <div class="modal-header" style="justify-content: center; flex-direction: column; gap: 10px; margin-bottom: 30px;">
+        <img src="https://www.dragonjarcon.org/wp-content/uploads/2023/10/Logo-Blango-DragonJAR-Security-Conference-.png" alt="DragonJAR" style="height: 40px;" />
+        <h2 style="font-size: 1.5rem; text-align: center;">DevGuard <span class="logo-accent">AI</span></h2>
+        <p style="color: var(--text-secondary); font-size: 0.85rem;">Acceso Restringido</p>
+      </div>
+      <div class="modal-body">
+        <label class="field-label">Usuario</label>
+        <input type="text" id="inputUsername" class="field-input" placeholder="Ingresa tu usuario" autocomplete="off" />
+        <label class="field-label" style="margin-top:16px">Contraseña</label>
+        <input type="password" id="inputPassword" class="field-input" placeholder="••••••••" autocomplete="off" />
+        <button class="btn-primary" id="btnLogin" style="margin-top:24px;width:100%;font-size:1rem;padding:14px;">Ingresar al Sistema</button>
+        <div id="loginFeedback" class="config-feedback" style="text-align: center;"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══════════════ HERO ═══════════════ -->
   <section class="hero">
     <div class="hero-glow hero-glow-1"></div>
