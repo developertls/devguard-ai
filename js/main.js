@@ -683,7 +683,7 @@ function initAuth() {
     const pass = inputPass.value.trim();
     
     // Hash SHA-256 de "demo123" generado de forma segura
-    const EXPECTED_HASH = "12759e6eb13e01bc6c016e78dd69ea2aa3f47c944883584d4af268498f7d9834";
+    const EXPECTED_HASH = "d3ad9315b7be5dd53b31a273b3b3aba5defe700808305aa16a3062b76658a791";
     const hashedInput = await hashPassword(pass);
 
     if (user === 'demo' && hashedInput === EXPECTED_HASH) {
