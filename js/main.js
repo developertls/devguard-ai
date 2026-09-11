@@ -650,8 +650,19 @@ function initAuth() {
   const inputUser = document.getElementById('inputUsername');
   const inputPass = document.getElementById('inputPassword');
   const feedback = document.getElementById('loginFeedback');
+  const btnLogout = document.getElementById('btnLogout');
 
   if (!overlay || !btnLogin) return;
+
+  if (btnLogout) {
+    btnLogout.addEventListener('click', () => {
+      sessionStorage.removeItem('devguard_auth');
+      overlay.classList.add('open');
+      inputUser.value = '';
+      inputPass.value = '';
+      showToast('Sesión cerrada correctamente', 'info');
+    });
+  }
 
   if (sessionStorage.getItem('devguard_auth') === 'true') {
     overlay.classList.remove('open');
