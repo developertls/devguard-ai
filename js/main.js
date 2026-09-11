@@ -104,8 +104,14 @@ function extractJSON(text) {
   // 1. Limpiar markdown (ej. ```json ... ```)
   let cleanText = text.replace(/```[a-z]*\n?/gi, '').replace(/```/g, '').trim();
   
-  // 1.5. Reparar secuencias de escape inválidas (ej. \ seguido de espacios que el LLM genera por error)
-  cleanText = cleanText.replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
+  // 1.5. Reparar secuencias de escape inválidas y saltos de línea reales dentro de los strings
+  cleanText = cleanText.replace(/"(?:[^"\\]|\\.)*"/g, function(match) {
+      return match
+        .replace(/\n/g, '\\n')
+        .replace(/\r/g, '\\r')
+        .replace(/\t/g, '\\t')
+        .replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
+  });
   
   // 2. Intento directo
   try { return JSON.parse(cleanText); } catch {}
@@ -125,7 +131,6 @@ function extractJSON(text) {
   
   if (matchStr) {
     try { 
-      // Reparación básica de JSON (comas al final)
       let fixedStr = matchStr.replace(/,\s*([\}\]])/g, '$1');
       return JSON.parse(fixedStr); 
     } catch (e) {
