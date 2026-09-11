@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DevGuard AI | Seguridad en Desarrollo</title>
+  
+  <!-- NIVELES DE SEGURIDAD EXTREMA -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: https://www.dragonjarcon.org; connect-src 'self' https://llm.retoia.app; worker-src blob:;">
+  <meta name="referrer" content="no-referrer">
+  
+  <meta name="description" content="Analiza tu código en segundos. Detecta secretos, vulnerabilidades OWASP, dependencias inseguras y genera reglas SAST automáticamente." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <!-- FontAwesome CDN para iconos de Hacking -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Monaco Editor CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+</head>
+<body>
+
+  <!-- ═══════════════ HEADER ═══════════════ -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <img src="https://www.dragonjarcon.org/wp-content/uploads/2023/10/Logo-Blango-DragonJAR-Security-Conference-.png" alt="DragonJAR" style="height: 28px; margin-right: 4px;" />
+        <span class="logo-text">DevGuard <span class="logo-accent">AI</span></span>
+        <span class="logo-badge">DragonJARCon 2026</span>
+      </div>
+      <nav class="header-nav">
+        <div class="api-status" id="apiStatus">
+          <span class="status-dot"></span>
+          <span class="status-text">Sin conectar</span>
+        </div>
+        <button class="btn-config" id="btnConfig">⚙ Configurar API</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ═══════════════ API CONFIG MODAL ═══════════════ -->
+  <div class="modal-overlay" id="modalConfig">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>🔑 Configurar API Key</h2>
+        <button class="modal-close" id="modalClose">✕</button>
+      </div>
+      <div class="modal-body">
+        <label class="field-label">API Key (sk-djc-...)</label>
+        <input type="password" id="inputApiKey" class="field-input" placeholder="sk-djc-..." autocomplete="off" />
+        <label class="field-label" style="margin-top:16px">Base URL</label>
+        <input type="text" id="inputBaseUrl" class="field-input" value="https://llm.retoia.app/v1" />
+        <button class="btn-primary" id="btnSaveConfig" style="margin-top:20px;width:100%">Guardar y probar conexión</button>
+        <div id="configFeedback" class="config-feedback"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ HERO ═══════════════ -->
+  <section class="hero">
+    <div class="hero-glow hero-glow-1"></div>
+    <div class="hero-glow hero-glow-2"></div>
+    <div class="hero-content">
+      <div class="hero-tag">Seguridad en Desarrollo · IA Powered</div>
+      <h1 class="hero-title">Analiza tu código.<br /><span class="gradient-text">Neutraliza las amenazas.</span></h1>
+      <p class="hero-subtitle">Detecta secretos expuestos, vulnerabilidades OWASP, dependencias inseguras y genera reglas SAST automáticamente — todo con IA, en segundos.</p>
+      <div class="hero-modules">
+        <span class="module-pill pill-red"><i class="fa-solid fa-user-secret"></i> Secret Scanner</span>
+        <span class="module-pill pill-orange"><i class="fa-solid fa-radiation"></i> Vuln Analyzer</span>
+        <span class="module-pill pill-yellow"><i class="fa-solid fa-link"></i> Dependency Check</span>
+        <span class="module-pill pill-blue"><i class="fa-solid fa-spider"></i> Threat Model</span>
+        <span class="module-pill pill-purple"><i class="fa-solid fa-terminal"></i> SAST Generator</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ MAIN APP ═══════════════ -->
+  <main class="app-main">
+
+    <!-- TABS -->
+    <div class="tabs-container">
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-tab="scanner" role="tab" id="tab-scanner">
+          <span class="tab-icon"><i class="fa-solid fa-user-secret"></i></span> Secret Scanner
+        </button>
+        <button class="tab" data-tab="analyzer" role="tab" id="tab-analyzer">
+          <span class="tab-icon"><i class="fa-solid fa-radiation"></i></span> Vuln Analyzer
+        </button>
+        <button class="tab" data-tab="deps" role="tab" id="tab-deps">
+          <span class="tab-icon"><i class="fa-solid fa-link"></i></span> Dependencies
+        </button>
+        <button class="tab" data-tab="threat" role="tab" id="tab-threat">
+          <span class="tab-icon"><i class="fa-solid fa-spider"></i></span> Threat Model
+        </button>
+        <button class="tab" data-tab="sast" role="tab" id="tab-sast">
+          <span class="tab-icon"><i class="fa-solid fa-terminal"></i></span> SAST Rules
+        </button>
+      </div>
+    </div>
+
+    <!-- ── TAB: SECRET SCANNER ── -->
+    <div class="tab-panel active" id="panel-scanner">
+      <div class="panel-layout">
+        <div class="panel-input">
+          <div class="panel-header">
+            <h2>Secret Scanner</h2>
+            <p>Detecta API keys, tokens, passwords y credenciales hardcoded en tu código.</p>
+          </div>
+          <div class="dropzone" id="dropzone-scanner">
+            <div class="dropzone-icon"><i class="fa-solid fa-file-code"></i></div>
+            <div class="dropzone-text">Arrastra un archivo aquí</div>
+            <div class="dropzone-sub">o pega tu código abajo</div>
+            <input type="file" id="file-scanner" class="file-input" accept=".js,.py,.go,.java,.php,.ts,.rb,.cs,.env,.yaml,.yml,.json,.sh,.tf" />
+          </div>
+          <div class="editor-wrap" id="editorWrap-scanner">
+            <div id="editor-scanner" class="code-editor"></div>
+          </div>
+          <div class="panel-actions">
+            <button class="btn-analyze" id="btn-scanner" disabled>
+              <span class="btn-icon"><i class="fa-solid fa-user-secret"></i></span> Analizar Secretos
+            </button>
+            <button class="btn-clear" id="clear-scanner">Limpiar</button>
+          </div>
+        </div>
+        <div class="panel-results" id="results-scanner">
+          <div class="results-placeholder">
+            <div class="placeholder-icon"><i class="fa-solid fa-key"></i></div>
+            <p>Los resultados aparecerán aquí</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: VULNERABILITY ANALYZER ── -->
+    <div class="tab-panel" id="panel-analyzer">
+      <div class="panel-layout">
+        <div class="panel-input">
+          <div class="panel-header">
+            <h2>Vulnerability Analyzer</h2>
+            <p>Detecta SQLi, XSS, IDOR, SSRF, RCE y otras vulnerabilidades OWASP Top 10 con razonamiento contextual.</p>
+          </div>
+          <div class="lang-selector">
+            <label class="field-label">Lenguaje</label>
+            <select id="lang-analyzer" class="field-select">
+              <option value="auto">Autodetectar</option>
+              <option value="javascript">JavaScript</option>
+              <option value="python">Python</option>
+              <option value="java">Java</option>
+              <option value="php">PHP</option>
+              <option value="go">Go</option>
+              <option value="csharp">C#</option>
+              <option value="ruby">Ruby</option>
+            </select>
+          </div>
+          <div class="dropzone" id="dropzone-analyzer">
+            <div class="dropzone-icon"><i class="fa-solid fa-file-shield"></i></div>
+            <div class="dropzone-text">Arrastra un archivo aquí</div>
+            <div class="dropzone-sub">o pega tu código abajo</div>
+            <input type="file" id="file-analyzer" class="file-input" />
+          </div>
+          <div class="editor-wrap" id="editorWrap-analyzer">
+            <div id="editor-analyzer" class="code-editor"></div>
+          </div>
+          <div class="panel-actions">
+            <button class="btn-analyze" id="btn-analyzer" disabled>
+              <span class="btn-icon"><i class="fa-solid fa-radiation"></i></span> Analizar Vulnerabilidades
+            </button>
+            <button class="btn-clear" id="clear-analyzer">Limpiar</button>
+          </div>
+        </div>
+        <div class="panel-results" id="results-analyzer">
+          <div class="results-placeholder">
+            <div class="placeholder-icon"><i class="fa-solid fa-shield-virus"></i></div>
+            <p>Los resultados aparecerán aquí</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: DEPENDENCIES ── -->
+    <div class="tab-panel" id="panel-deps">
+      <div class="panel-layout">
+        <div class="panel-input">
+          <div class="panel-header">
+            <h2>Dependency Checker</h2>
+            <p>Analiza <code>package.json</code>, <code>requirements.txt</code>, <code>pom.xml</code> o <code>go.mod</code> en busca de dependencias vulnerables.</p>
+          </div>
+          <div class="dropzone" id="dropzone-deps">
+            <div class="dropzone-icon"><i class="fa-solid fa-cubes"></i></div>
+            <div class="dropzone-text">Arrastra tu archivo de dependencias</div>
+            <div class="dropzone-sub">package.json · requirements.txt · pom.xml · go.mod</div>
+            <input type="file" id="file-deps" class="file-input" accept=".json,.txt,.xml,.mod,.toml,.lock" />
+          </div>
+          <div class="editor-wrap" id="editorWrap-deps">
+            <div id="editor-deps" class="code-editor"></div>
+          </div>
+          <div class="panel-actions">
+            <button class="btn-analyze" id="btn-deps" disabled>
+              <span class="btn-icon"><i class="fa-solid fa-link"></i></span> Analizar Dependencias
+            </button>
+            <button class="btn-clear" id="clear-deps">Limpiar</button>
+          </div>
+        </div>
+        <div class="panel-results" id="results-deps">
+          <div class="results-placeholder">
+            <div class="placeholder-icon"><i class="fa-solid fa-box-open"></i></div>
+            <p>Los resultados aparecerán aquí</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: THREAT MODEL ── -->
+    <div class="tab-panel" id="panel-threat">
+      <div class="panel-layout">
+        <div class="panel-input">
+          <div class="panel-header">
+            <h2>Threat Modeler</h2>
+            <p>Describe tu sistema o arquitectura y genera un modelo de amenazas STRIDE con vectores de ataque y controles recomendados.</p>
+          </div>
+          <div class="editor-wrap" id="editorWrap-threat" style="height:320px">
+            <textarea id="editor-threat" class="threat-textarea" placeholder="Describe tu sistema:&#10;&#10;Ejemplo: API REST en Node.js con autenticación JWT, base de datos PostgreSQL, caché Redis, accesible desde internet público. Los usuarios suben archivos que se procesan de forma asíncrona con colas RabbitMQ..."></textarea>
+          </div>
+          <div class="panel-actions">
+            <button class="btn-analyze" id="btn-threat" disabled>
+              <span class="btn-icon"><i class="fa-solid fa-spider"></i></span> Generar Threat Model
+            </button>
+            <button class="btn-clear" id="clear-threat">Limpiar</button>
+          </div>
+        </div>
+        <div class="panel-results" id="results-threat">
+          <div class="results-placeholder">
+            <div class="placeholder-icon"><i class="fa-solid fa-network-wired"></i></div>
+            <p>Los resultados aparecerán aquí</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: SAST RULE GENERATOR ── -->
+    <div class="tab-panel" id="panel-sast">
+      <div class="panel-layout">
+        <div class="panel-input">
+          <div class="panel-header">
+            <h2>SAST Rule Generator</h2>
+            <p>Describe una vulnerabilidad y genera una regla <strong>Semgrep</strong> lista para tu pipeline CI/CD.</p>
+          </div>
+          <div class="sast-form">
+            <label class="field-label">Tipo de vulnerabilidad</label>
+            <input type="text" id="sast-vuln-type" class="field-input" placeholder="Ej: SQL Injection, XSS, Path Traversal..." />
+            <label class="field-label" style="margin-top:16px">Lenguaje objetivo</label>
+            <select id="sast-lang" class="field-select">
+              <option value="javascript">JavaScript</option>
+              <option value="python">Python</option>
+              <option value="java">Java</option>
+              <option value="php">PHP</option>
+              <option value="go">Go</option>
+              <option value="ruby">Ruby</option>
+              <option value="csharp">C#</option>
+            </select>
+            <label class="field-label" style="margin-top:16px">Código vulnerable (ejemplo)</label>
+            <div id="editor-sast" class="code-editor" style="height:200px"></div>
+            <label class="field-label" style="margin-top:16px">Descripción adicional (opcional)</label>
+            <textarea id="sast-description" class="threat-textarea" style="height:80px" placeholder="Contexto adicional sobre la vulnerabilidad..."></textarea>
+          </div>
+          <div class="panel-actions">
+            <button class="btn-analyze" id="btn-sast" disabled>
+              <span class="btn-icon"><i class="fa-solid fa-terminal"></i></span> Generar Regla Semgrep
+            </button>
+            <button class="btn-clear" id="clear-sast">Limpiar</button>
+          </div>
+        </div>
+        <div class="panel-results" id="results-sast">
+          <div class="results-placeholder">
+            <div class="placeholder-icon"><i class="fa-solid fa-microchip"></i></div>
+            <p>Los resultados aparecerán aquí</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ═══════════════ TOAST ═══════════════ -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ═══════════════ SCRIPTS ═══════════════ -->
+  <script src="js/main.js"></script>
+</body>
+</html>
