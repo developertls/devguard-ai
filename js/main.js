@@ -643,5 +643,40 @@ function initApp() {
   });
 }
 
+// Auth Logic
+function initAuth() {
+  const overlay = document.getElementById('loginOverlay');
+  const btnLogin = document.getElementById('btnLogin');
+  const inputUser = document.getElementById('inputUsername');
+  const inputPass = document.getElementById('inputPassword');
+  const feedback = document.getElementById('loginFeedback');
+
+  if (!overlay || !btnLogin) return;
+
+  if (sessionStorage.getItem('devguard_auth') === 'true') {
+    overlay.classList.remove('open');
+    return;
+  }
+
+  btnLogin.addEventListener('click', () => {
+    if (inputUser.value.trim() === 'admin' && inputPass.value === 'dragonjar2026') {
+      sessionStorage.setItem('devguard_auth', 'true');
+      overlay.classList.remove('open');
+      showToast('Autenticación exitosa. Bienvenido al panel.', 'success');
+    } else {
+      feedback.textContent = 'Credenciales incorrectas.';
+      feedback.className = 'config-feedback err';
+      inputPass.value = '';
+    }
+  });
+
+  inputPass.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') btnLogin.click();
+  });
+}
+
 // Ejecutar todo
-document.addEventListener('DOMContentLoaded', initApp);
+document.addEventListener('DOMContentLoaded', () => {
+  initAuth();
+  initApp();
+});
