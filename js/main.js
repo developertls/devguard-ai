@@ -104,6 +104,9 @@ function extractJSON(text) {
   // 1. Limpiar markdown (ej. ```json ... ```)
   let cleanText = text.replace(/```[a-z]*\n?/gi, '').replace(/```/g, '').trim();
   
+  // 1.5. Reparar secuencias de escape inválidas (ej. \ seguido de espacios que el LLM genera por error)
+  cleanText = cleanText.replace(/\\(?!["\\/bfnrtu])/g, '\\\\');
+  
   // 2. Intento directo
   try { return JSON.parse(cleanText); } catch {}
   
@@ -114,7 +117,6 @@ function extractJSON(text) {
   const lastBracket = cleanText.lastIndexOf(']');
   
   let matchStr = '';
-  // Priorizar objetos {}
   if (firstBrace !== -1 && lastBrace !== -1 && (firstBracket === -1 || firstBrace < firstBracket)) {
     matchStr = cleanText.substring(firstBrace, lastBrace + 1);
   } else if (firstBracket !== -1 && lastBracket !== -1) {
