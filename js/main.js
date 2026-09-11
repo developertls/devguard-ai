@@ -670,7 +670,7 @@ function initAuth() {
   }
 
   btnLogin.addEventListener('click', () => {
-    if (inputUser.value.trim() === 'admin' && inputPass.value === 'dragonjar2026') {
+    if (inputUser.value.trim() === 'demo' && inputPass.value === 'demo123') {
       sessionStorage.setItem('devguard_auth', 'true');
       overlay.classList.remove('open');
       showToast('Autenticación exitosa. Bienvenido al panel.', 'success');
